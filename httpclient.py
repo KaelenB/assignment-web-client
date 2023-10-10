@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 # coding: utf-8
+#    Copyright 2023 Kaelen Brown
+# 
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+# 
+#        http://www.apache.org/licenses/LICENSE-2.0
+# 
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+# 
+# Contains Code Licensed under the Apache License, Version 2.0
 # Copyright 2016 Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-# 
-#     http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-# Do not use urllib's HTTP GET and POST mechanisms.
-# Write your own HTTP GET and POST
-# The point is to understand what you have to send and get experience with it
 
 import sys
 import socket
