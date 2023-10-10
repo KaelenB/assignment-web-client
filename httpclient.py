@@ -35,47 +35,93 @@ class HTTPResponse(object):
 class HTTPClient(object):
     #def get_host_port(self,url):
 
-    def connect(self, host, port):
+    def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((host, port))
-        return None
 
-    def get_code(self, data):
-        return None
-
-    def get_headers(self,data):
-        return None
-
-    def get_body(self, data):
-        return None
-    
-    def sendall(self, data):
-        self.socket.sendall(data.encode('utf-8'))
+        # Get the IP address of the host
+        address = socket.gethostbyname(self.host)
         
-    def close(self):
+        self.socket.connect((address, self.port))
+
+    def send_to_socket(self, message):
+        # Connect to the socket
+        self.connect()
+
+        # Send the message
+        self.socket.sendall(message)
+
+        # Receive the response
+        self.read_response()
+
+        # Close the socket
         self.socket.close()
 
+    def read_response(self):
+        # Recieve response
+        data = self.recvall()
+
+        # Get the code and body from the response
+        self.read_code(data)
+        self.read_body(data)
+
+    def read_code(self, data):
+        # Get the code after the HTTP version
+        match  = re.search(r"(?<=HTTP/[12]\.[01] )\d+", data)
+
+        if match:
+            self.code = int(match.group(0))
+        else:
+            self.code = 500
+    
+    def read_body(self, data):
+        # Get all characters after the last \r\n\r\n
+        match = re.search(r"(?<=\r\n\r\n).*", data, re.DOTALL)
+
+        if match:
+            self.body = match.group(0)
+        else:
+            self.body = ""
+
+    def read_url(self, url):
+        # Get host, optional port and optional path
+        match = re.search(r"http://([^:/]+)(?::(\d+))?(/.*)?", url)
+
+        if match:
+            self.host = match.group(1)
+            self.port = int(match.group(2)) if match.group(2) != None else 80
+            self.path = match.group(3) or "/"
+        # Invalid URL
+        else:   
+            exit()
+
     # read everything from the socket
-    def recvall(self, sock):
+    def recvall(self):
         buffer = bytearray()
         done = False
         while not done:
-            part = sock.recv(1024)
+            part = self.socket.recv(1024)
             if (part):
                 buffer.extend(part)
             else:
                 done = not part
         return buffer.decode('utf-8')
-
+    
     def GET(self, url, args=None):
-        code = 500
-        body = ""
-        return HTTPResponse(code, body)
+        self.read_url(url)
+        message = f"GET /{self.path} HTTP/1.1\r\nHost: {self.host}\r\nAccept:*/*\r\nConnection:close\r\n\r\n".encode('utf-8')
+
+        self.send_to_socket(message)
+
+        return HTTPResponse(self.code, self.body)
 
     def POST(self, url, args=None):
-        code = 500
-        body = ""
-        return HTTPResponse(code, body)
+        self.read_url(url)
+        content = urllib.parse.urlencode(args) if args != None else ''
+        message = f"POST /{self.path} HTTP/1.1\r\nHost: {self.host}\r\nAccept: */*\r\nContent-Length: {len(content)}\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n{content}".encode('utf-8')
+
+        self.send_to_socket(message)
+
+        return HTTPResponse(self.code, self.body)
 
     def command(self, url, command="GET", args=None):
         if (command == "POST"):
